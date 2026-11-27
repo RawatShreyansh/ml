@@ -1,0 +1,41 @@
+name: logreg-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "logreg/**"
+      - ".github/workflows/logreg-ci.yml"
+  pull_request:
+    paths:
+      - "logreg/**"
+      - ".github/workflows/logreg-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: logreg
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: logreg/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: make lint
+
+      - name: Type check
+        run: make typecheck
+
+      - name: Test
+        run: make test
